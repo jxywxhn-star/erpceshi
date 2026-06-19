@@ -169,6 +169,13 @@ export const ocrApi = {
   analyze: (data) => request.post('/ocr/analyze', data),
 };
 
+// 千牛采集数据（经营指标 / 店铺信用 / 商品诊断），由桌面连接器推送入库
+export const qianniuApi = {
+  overview: () => request.get('/qianniu/overview'),
+  credit: () => request.get('/qianniu/credit'),
+  diagnosis: (params) => request.get('/qianniu/diagnosis', { params }),
+};
+
 export const settingsApi = {
   get: () => request.get('/settings'),
   save: (data) => request.post('/settings', data),

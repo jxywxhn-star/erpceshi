@@ -13,6 +13,7 @@ import CollectorIssues from './pages/collector-issues';
 import FactoryWorkbench from './pages/factory';
 import Products from './pages/products';
 import ShopOverview from './pages/shop-overview';
+import QianniuData from './pages/qianniu';
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('token');
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="orders" element={<Orders />} />
           <Route path="shops" element={<Shops />} />
           <Route path="shop-overview" element={<ShopOverview />} />
+          <Route path="qianniu" element={<QianniuData />} />
           <Route path="users" element={<Users />} />
           <Route path="settings" element={<Settings />} />
           <Route path="collector-issues" element={<CollectorIssues />} />

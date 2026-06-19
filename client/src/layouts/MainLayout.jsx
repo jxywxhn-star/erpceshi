@@ -4,6 +4,7 @@ import { Alert, Avatar, Button, Dropdown, Layout, Menu, Space, Tag, Typography, 
 import {
   AppstoreOutlined,
   BarChartOutlined,
+  CloudOutlined,
   DashboardOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
@@ -28,6 +29,7 @@ const primaryMenu = [
   { key: '/orders', icon: <ShoppingOutlined />, label: '订单中心' },
   { key: '/shops', icon: <ShopOutlined />, label: '店铺同步' },
   { key: '/shop-overview', icon: <RiseOutlined />, label: '店铺概览' },
+  { key: '/qianniu', icon: <CloudOutlined />, label: '千牛数据' },
   { key: '/reports', icon: <BarChartOutlined />, label: '数据报表' },
 ];
 
