@@ -19,7 +19,6 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { useResponsive } from '../hooks/useResponsive';
-import { collectorApi } from '../api';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -28,14 +27,12 @@ const primaryMenu = [
   { key: '/', icon: <DashboardOutlined />, label: '运营总览' },
   { key: '/orders', icon: <ShoppingOutlined />, label: '订单中心' },
   { key: '/shops', icon: <ShopOutlined />, label: '店铺同步' },
-  { key: '/shop-overview', icon: <RiseOutlined />, label: '店铺概览' },
   { key: '/qianniu', icon: <CloudOutlined />, label: '千牛数据' },
   { key: '/reports', icon: <BarChartOutlined />, label: '数据报表' },
 ];
 
 const adminMenu = [
   { key: '/products', icon: <AppstoreOutlined />, label: '成品库' },
-  { key: '/collector-issues', icon: <WarningOutlined />, label: '采集诊断' },
   { key: '/users', icon: <TeamOutlined />, label: '账号权限' },
   { key: '/settings', icon: <SettingOutlined />, label: '系统设置' },
 ];
@@ -120,7 +117,6 @@ export default function MainLayout({ user, onLogout }) {
   const location = useLocation();
   const { isMobile } = useResponsive();
   const [collapsed, setCollapsed] = useState(false);
-  const [securityIssues, setSecurityIssues] = useState([]);
   const menuItems = menuForRole(user?.role);
   const activeMobileMenu = user?.role === 'factory' ? factoryMobileMenu : mobileMenu;
   const selectedKey = currentMenuKey(location.pathname);
@@ -136,44 +132,6 @@ export default function MainLayout({ user, onLogout }) {
     }
   }, [user?.role, location.pathname, navigate]);
 
-  const openSecurityIssueShop = async (issue) => {
-    const collectorShopId = String(issue?.collector_shop_id || '').trim();
-    if (!collectorShopId) {
-      antdMessage.warning('\u8fd9\u6761\u8bca\u65ad\u6ca1\u6709\u5e97\u94fa\u4f1a\u8bdd\u7f16\u53f7');
-      return;
-    }
-
-    await collectorApi.openShop(collectorShopId, {
-      platform: issue?.display_platform || issue?.platform,
-      shop_name: issue?.shop_name || '',
-    });
-    antdMessage.success('\u5df2\u5524\u8d77\u8be5\u5e97\u94fa\u4f1a\u8bdd\uff0c\u8bf7\u5728\u6253\u5f00\u7684\u7a97\u53e3\u5904\u7406\u9a8c\u8bc1');
-  };
-
-  const securityIssueDescription = (
-    <Space direction="vertical" size={8} style={{ width: '100%' }}>
-      <Text>
-        {'\u4e0b\u9762\u5217\u51fa\u7684\u5c31\u662f\u9700\u8981\u5904\u7406\u7684\u5177\u4f53\u4f1a\u8bdd\u3002\u5e97\u94fa\u540d\u672a\u8bc6\u522b\u65f6\uff0c\u70b9\u51fb\u201c\u5524\u8d77\u6b64\u5e97\u94fa\u201d\u76f4\u63a5\u6253\u5f00\u5bf9\u5e94\u9875\u9762\u786e\u8ba4\u3002'}
-      </Text>
-      {securityIssues.slice(0, 5).map((issue) => (
-        <Space key={issue.id || issue.collector_shop_id || issueShopLabel(issue)} wrap size={8}>
-          <Text strong>{issueShopLabel(issue)}</Text>
-          <Button
-            size="small"
-            danger
-            disabled={!issue.collector_shop_id}
-            onClick={() => openSecurityIssueShop(issue)}
-          >
-            {'\u5524\u8d77\u6b64\u5e97\u94fa'}
-          </Button>
-        </Space>
-      ))}
-      {securityIssues.length > 5 && (
-        <Text type="secondary">{`\u8fd8\u6709 ${securityIssues.length - 5} \u4e2a\uff0c\u8bf7\u70b9\u51fb\u201c\u67e5\u8bca\u65ad\u201d\u67e5\u770b\u5168\u90e8\u3002`}</Text>
-      )}
-    </Space>
-  );
-
   const accountMenu = {
     items: [
       { key: 'profile', icon: <UserOutlined />, label: '个人资料', onClick: () => navigate('/profile') },
@@ -182,57 +140,10 @@ export default function MainLayout({ user, onLogout }) {
     ],
   };
 
-  useEffect(() => {
-    if (user?.role !== 'admin') return undefined;
-
-    let cancelled = false;
-    const fetchSecurityIssues = async () => {
-      try {
-        const res = await collectorApi.issues({ resolved: '0', page: 1, pageSize: 50 });
-        if (cancelled) return;
-        const list = (res?.list || []).filter((issue) => (
-          SECURITY_ISSUE_PATTERN.test(`${issue.title || ''} ${issue.message || ''} ${issue.details || ''}`)
-        ));
-        setSecurityIssues(list);
-      } catch {
-        if (!cancelled) setSecurityIssues([]);
-      }
-    };
-
-    fetchSecurityIssues();
-    const timer = window.setInterval(fetchSecurityIssues, 15000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(timer);
-    };
-  }, [user?.role]);
-
-  const securityAlert = user?.role === 'admin' && securityIssues.length > 0 ? (
-    <Alert
-      type="error"
-      showIcon
-      icon={<WarningOutlined />}
-      message={`\u6709 ${securityIssues.length} \u4e2a\u5e97\u94fa\u51fa\u73b0\u6ed1\u5757\u6216\u5b89\u5168\u9a8c\u8bc1`}
-      description={securityIssueDescription}
-      action={(
-        <Space wrap>
-          <Button size="small" danger onClick={() => navigate('/shops')}>
-            {'\u53bb\u5904\u7406'}
-          </Button>
-          <Button size="small" onClick={() => navigate('/collector-issues')}>
-            {'\u67e5\u8bca\u65ad'}
-          </Button>
-        </Space>
-      )}
-      style={{ marginBottom: 12 }}
-    />
-  ) : null;
-
   if (isMobile) {
     return (
       <Layout style={{ minHeight: '100vh', background: '#f6f7f9' }}>
         <Content style={{ padding: 12, paddingBottom: 68 }}>
-          {securityAlert}
           <Outlet />
         </Content>
         <nav className="oms-mobile-tabs">
@@ -307,7 +218,6 @@ export default function MainLayout({ user, onLogout }) {
           </Space>
         </Header>
         <Content className="oms-content">
-          {securityAlert}
           <Outlet />
         </Content>
       </Layout>

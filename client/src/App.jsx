@@ -9,10 +9,8 @@ import Users from './pages/users';
 import Reports from './pages/reports';
 import Profile from './pages/profile';
 import Settings from './pages/settings';
-import CollectorIssues from './pages/collector-issues';
 import FactoryWorkbench from './pages/factory';
 import Products from './pages/products';
-import ShopOverview from './pages/shop-overview';
 import QianniuData from './pages/qianniu';
 
 function PrivateRoute({ children }) {
@@ -56,11 +54,9 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="orders" element={<Orders />} />
           <Route path="shops" element={<Shops />} />
-          <Route path="shop-overview" element={<ShopOverview />} />
           <Route path="qianniu" element={<QianniuData />} />
           <Route path="users" element={<Users />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="collector-issues" element={<CollectorIssues />} />
           <Route path="reports" element={<Reports />} />
           <Route path="products" element={<Products />} />
           <Route path="factory" element={<FactoryWorkbench />} />
