@@ -49,6 +49,20 @@ export function ensureQianniuTables(db) {
       diagnosed_items INTEGER DEFAULT 0,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    -- 店铺采集状态（千牛自驱动，连接器推送；店铺同步页只读展示）
+    CREATE TABLE IF NOT EXISTS qianniu_shop_status (
+      shop_id INTEGER PRIMARY KEY,
+      collector_shop_id TEXT NOT NULL DEFAULT '',
+      unb TEXT DEFAULT '', account TEXT DEFAULT '',
+      login_ok INTEGER DEFAULT 1,
+      phase TEXT DEFAULT '',
+      total_known INTEGER DEFAULT 0,
+      total_in_db INTEGER DEFAULT 0,
+      last_collect TEXT DEFAULT '',
+      next_due TEXT DEFAULT '',
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `);
   ensured = true;
 }

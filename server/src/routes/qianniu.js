@@ -116,7 +116,50 @@ router.post('/ingest/diagnosis', (req, res) => {
   res.json({ ok: true, shop_id: shopId, item_count: items.length });
 });
 
+// 店铺采集状态（连接器推送千牛 shop/name + poll/queue）
+router.post('/ingest/shop-status', (req, res) => {
+  const db = getDb();
+  const list = Array.isArray(req.body?.shops) ? req.body.shops : [];
+  let updated = 0;
+  const up = db.prepare(`
+    INSERT INTO qianniu_shop_status (shop_id, collector_shop_id, unb, account, login_ok, phase, total_known, total_in_db, last_collect, next_due, updated_at)
+    VALUES (@shop_id, @cid, @unb, @account, @login_ok, @phase, @total_known, @total_in_db, @last_collect, @next_due, CURRENT_TIMESTAMP)
+    ON CONFLICT(shop_id) DO UPDATE SET
+      collector_shop_id=excluded.collector_shop_id, unb=excluded.unb, account=excluded.account,
+      login_ok=excluded.login_ok, phase=excluded.phase, total_known=excluded.total_known,
+      total_in_db=excluded.total_in_db, last_collect=excluded.last_collect, next_due=excluded.next_due,
+      updated_at=CURRENT_TIMESTAMP
+  `);
+  const tx = db.transaction(() => {
+    for (const s of list) {
+      const shopId = resolveShopId(db, s.collector_shop_id);
+      if (!shopId) continue;
+      up.run({
+        shop_id: shopId, cid: String(s.collector_shop_id || ''), unb: String(s.unb || ''),
+        account: String(s.account || ''), login_ok: s.login_ok === false ? 0 : 1,
+        phase: String(s.phase || ''), total_known: Number(s.total_known || 0),
+        total_in_db: Number(s.total_in_db || 0), last_collect: String(s.last_collect || ''),
+        next_due: String(s.next_due || ''),
+      });
+      updated += 1;
+    }
+  });
+  tx();
+  res.json({ ok: true, updated });
+});
+
 // ---------- 查询（前端页面） ----------
+
+router.get('/shop-status', (req, res) => {
+  const db = getDb();
+  const rows = db.prepare(`
+    SELECT st.*, s.name AS shop_name, s.platform, s.real_name
+    FROM qianniu_shop_status st JOIN shops s ON s.id = st.shop_id
+    ORDER BY s.name
+  `).all();
+  res.json({ ok: true, shops: rows });
+});
+
 
 router.get('/overview', (req, res) => {
   const db = getDb();

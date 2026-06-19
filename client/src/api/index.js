@@ -174,6 +174,7 @@ export const qianniuApi = {
   overview: () => request.get('/qianniu/overview'),
   credit: () => request.get('/qianniu/credit'),
   diagnosis: (params) => request.get('/qianniu/diagnosis', { params }),
+  shopStatus: () => request.get('/qianniu/shop-status'),
 };
 
 export const settingsApi = {
