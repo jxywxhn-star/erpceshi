@@ -323,3 +323,6 @@ body {
     display: block !important;
   }
 }
+
+/* 店铺同步: 风控/掉线异常行标红 */
+.oms-row-danger td { background: #fff1f0 !important; }

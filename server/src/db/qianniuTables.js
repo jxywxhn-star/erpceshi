@@ -61,8 +61,14 @@ export function ensureQianniuTables(db) {
       total_in_db INTEGER DEFAULT 0,
       last_collect TEXT DEFAULT '',
       next_due TEXT DEFAULT '',
+      healthy INTEGER DEFAULT 1,
+      last_error TEXT DEFAULT '',
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
+  // 兼容已存在的旧表: 缺列则补(健康/错误)
+  const cols = db.prepare("PRAGMA table_info(qianniu_shop_status)").all().map((c) => c.name);
+  if (!cols.includes('healthy')) db.prepare("ALTER TABLE qianniu_shop_status ADD COLUMN healthy INTEGER DEFAULT 1").run();
+  if (!cols.includes('last_error')) db.prepare("ALTER TABLE qianniu_shop_status ADD COLUMN last_error TEXT DEFAULT ''").run();
   ensured = true;
 }

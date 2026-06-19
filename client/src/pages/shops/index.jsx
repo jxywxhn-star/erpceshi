@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Card, Table, Tag, Progress, Space, Typography, Button, Alert, message } from 'antd';
-import { ReloadOutlined, CloudOutlined } from '@ant-design/icons';
+import { Card, Table, Tag, Progress, Space, Typography, Button, Alert, message, Tooltip } from 'antd';
+import { ReloadOutlined, CloudOutlined, WarningOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { shopApi, qianniuApi } from '../../api';
 
 const { Text } = Typography;
@@ -91,7 +91,26 @@ export default function Shops() {
       width: 100,
       render: (_, r) => <Text type="secondary" style={{ fontSize: 12 }}>{r.qn?.next_due || '—'}</Text>,
     },
+    {
+      title: '运行状态',
+      key: 'health',
+      width: 130,
+      render: (_, r) => {
+        if (!r.qn) return <Text type="secondary">—</Text>;
+        const bad = r.qn.healthy === 0 || r.qn.login_ok === 0 || r.qn.login_ok === false;
+        if (!bad) return <Tag color="green" icon={<CheckCircleOutlined />}>正常</Tag>;
+        const msg = r.qn.last_error || (r.qn.login_ok ? '采集异常' : '登录失效');
+        const risk = /失效|登录|login|验证|滑块|风控/i.test(msg);
+        return (
+          <Tooltip title={msg}>
+            <Tag color="red" icon={<WarningOutlined />}>{risk ? '疑似风控/掉线' : '采集异常'}</Tag>
+          </Tooltip>
+        );
+      },
+    },
   ];
+
+  const unhealthy = rows.filter((r) => r.qn && (r.qn.healthy === 0 || r.qn.login_ok === 0 || r.qn.login_ok === false));
 
   return (
     <Card
@@ -99,14 +118,42 @@ export default function Shops() {
       bordered={false}
       extra={<Button icon={<ReloadOutlined />} onClick={load} loading={loading}>刷新</Button>}
     >
+      {unhealthy.length > 0 && (
+        <Alert
+          type="error"
+          showIcon
+          icon={<WarningOutlined />}
+          style={{ marginBottom: 12 }}
+          message={`有 ${unhealthy.length} 个店铺疑似风控/掉线，请去千牛客户端处理`}
+          description={
+            <Space direction="vertical" size={2}>
+              {unhealthy.slice(0, 10).map((r) => (
+                <Text key={r.id}>
+                  <Text strong>{r.real_name || r.name}</Text>
+                  {'：'}{r.qn.last_error || (r.qn.login_ok ? '采集异常' : '登录失效')}
+                </Text>
+              ))}
+              {unhealthy.length > 10 && <Text type="secondary">…还有 {unhealthy.length - 10} 个</Text>}
+            </Space>
+          }
+        />
+      )}
       <Alert
         type="info"
         showIcon
         style={{ marginBottom: 16 }}
         message="千牛自驱动采集，无需手动操作"
-        description="在千牛客户端登录的店铺会被自动发现并持续采集（新店首次全量、之后增量）。本页只读展示各店真实采集状态与进度；订单与地址由后台连接器自动同步到 ERP。"
+        description="在千牛客户端登录的店铺会被自动发现并持续采集（新店首次全量、之后增量）。本页只读展示各店真实采集状态与进度；订单与地址由后台连接器自动同步到 ERP。出现风控/掉线会在上方红色提示并在该店标红。"
       />
-      <Table rowKey="id" columns={columns} dataSource={rows} loading={loading} pagination={false} size="small" />
+      <Table
+        rowKey="id"
+        columns={columns}
+        dataSource={rows}
+        loading={loading}
+        pagination={false}
+        size="small"
+        rowClassName={(r) => (r.qn && (r.qn.healthy === 0 || r.qn.login_ok === 0 || r.qn.login_ok === false) ? 'oms-row-danger' : '')}
+      />
     </Card>
   );
 }

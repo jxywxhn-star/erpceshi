@@ -122,12 +122,13 @@ router.post('/ingest/shop-status', (req, res) => {
   const list = Array.isArray(req.body?.shops) ? req.body.shops : [];
   let updated = 0;
   const up = db.prepare(`
-    INSERT INTO qianniu_shop_status (shop_id, collector_shop_id, unb, account, login_ok, phase, total_known, total_in_db, last_collect, next_due, updated_at)
-    VALUES (@shop_id, @cid, @unb, @account, @login_ok, @phase, @total_known, @total_in_db, @last_collect, @next_due, CURRENT_TIMESTAMP)
+    INSERT INTO qianniu_shop_status (shop_id, collector_shop_id, unb, account, login_ok, phase, total_known, total_in_db, last_collect, next_due, healthy, last_error, updated_at)
+    VALUES (@shop_id, @cid, @unb, @account, @login_ok, @phase, @total_known, @total_in_db, @last_collect, @next_due, @healthy, @last_error, CURRENT_TIMESTAMP)
     ON CONFLICT(shop_id) DO UPDATE SET
       collector_shop_id=excluded.collector_shop_id, unb=excluded.unb, account=excluded.account,
       login_ok=excluded.login_ok, phase=excluded.phase, total_known=excluded.total_known,
       total_in_db=excluded.total_in_db, last_collect=excluded.last_collect, next_due=excluded.next_due,
+      healthy=excluded.healthy, last_error=excluded.last_error,
       updated_at=CURRENT_TIMESTAMP
   `);
   const tx = db.transaction(() => {
@@ -140,6 +141,7 @@ router.post('/ingest/shop-status', (req, res) => {
         phase: String(s.phase || ''), total_known: Number(s.total_known || 0),
         total_in_db: Number(s.total_in_db || 0), last_collect: String(s.last_collect || ''),
         next_due: String(s.next_due || ''),
+        healthy: s.healthy === false ? 0 : 1, last_error: String(s.error || ''),
       });
       updated += 1;
     }
