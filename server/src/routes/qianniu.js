@@ -150,6 +150,17 @@ router.post('/ingest/shop-status', (req, res) => {
 
 // ---------- 查询（前端页面） ----------
 
+// 每店已入库订单数(按 collector_shop_id), 供连接器自动对账补全历史
+router.get('/order-counts', (req, res) => {
+  const db = getDb();
+  const rows = db.prepare(
+    "SELECT collector_shop_id AS cid, COUNT(*) AS c FROM orders WHERE collector_shop_id <> '' GROUP BY collector_shop_id",
+  ).all();
+  const counts = {};
+  for (const r of rows) counts[r.cid] = r.c;
+  res.json({ ok: true, counts });
+});
+
 router.get('/shop-status', (req, res) => {
   const db = getDb();
   const rows = db.prepare(`
