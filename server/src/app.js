@@ -13,6 +13,7 @@ import reportRoutes from './routes/reports.js';
 import ocrRoutes from './routes/ocr.js';
 import settingsRoutes from './routes/settings.js';
 import collectorRoutes from './routes/collector.js';
+import qianniuRoutes from './routes/qianniu.js';
 import factoryRoutes from './routes/factory.js';
 import uploadRoutes from './routes/uploads.js';
 import productRoutes from './routes/products.js';
@@ -40,6 +41,7 @@ if (remoteBaseUrl) {
   app.use('/api/factory', remoteProxy);
   app.use('/api/uploads', remoteProxy);
   app.use('/api/products', remoteProxy);
+  app.use('/api/qianniu', remoteProxy);
   // 注：素材图为二进制，不走文本代理（会损坏）。Web 端直接访问中心服务器，
   // 图片由中心服务器的静态目录提供，桥接端不再本地服务 /uploads。
 } else {
@@ -54,6 +56,7 @@ if (remoteBaseUrl) {
   app.use('/api/factory', factoryRoutes);
   app.use('/api/uploads', uploadRoutes);
   app.use('/api/products', productRoutes);
+  app.use('/api/qianniu', qianniuRoutes);
 
   // 工厂素材图静态访问（存储在挂载盘或数据目录）
   mkdirSync(UPLOADS_DIR, { recursive: true });
