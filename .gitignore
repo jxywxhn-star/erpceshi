@@ -1,0 +1,25 @@
+# 依赖
+node_modules/
+# 构建产物
+client/dist/
+client/dist.bak*/
+**/dist.bak*/
+# 数据库 / 上传 / 运行数据（含隐私，绝不上传）
+server/data/
+server/updates/
+updates/
+backups/
+*.db
+*.db-*
+uploads/
+# 备份漂移文件
+*.bak-*
+*.bak.*
+# 环境/密钥
+.env
+.env.local
+*.local
+# 日志
+*.log
+# 系统
+.DS_Store

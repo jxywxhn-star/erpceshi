@@ -1,0 +1,325 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 3px;
+}
+
+.mobile-hidden {
+  display: block;
+}
+
+.desktop-hidden {
+  display: none;
+}
+
+.oms-brand {
+  height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.oms-brand img {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.oms-brand strong {
+  display: block;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.oms-brand span,
+.oms-header-subtitle {
+  display: block;
+  color: #8b95a5;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.oms-header {
+  height: 64px;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.oms-content {
+  margin: 0;
+  padding: 20px;
+  min-height: calc(100vh - 64px);
+  background: #f4f6f8;
+}
+
+.oms-account {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.oms-account:hover {
+  background: #f3f4f6;
+}
+
+.oms-mobile-tabs {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+  padding: 4px 0 env(safe-area-inset-bottom, 4px);
+}
+
+.oms-mobile-tabs button {
+  border: 0;
+  background: transparent;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 4px 0;
+}
+
+.oms-mobile-tabs button span {
+  display: block;
+}
+
+.oms-mobile-tabs svg {
+  font-size: 19px;
+}
+
+.oms-mobile-tabs button.active {
+  color: #1677ff;
+}
+
+.oms-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #f4f6f8;
+}
+
+.oms-login-card {
+  width: min(420px, 100%);
+  border-radius: 8px;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+}
+
+.oms-login-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.oms-login-brand img {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.inline-edit {
+  width: 100%;
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.inline-edit > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inline-edit .anticon {
+  color: #9ca3af;
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+
+.money-stack-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  line-height: 20px;
+}
+
+.money-stack-row .inline-edit {
+  min-height: 20px;
+}
+
+.orders-platform-table .ant-table {
+  font-size: 13px;
+}
+
+.orders-platform-table .ant-table-thead > tr > th {
+  padding: 8px 10px;
+  background: #f8fafc;
+}
+
+.orders-platform-table .ant-table-tbody > tr > td {
+  padding: 8px 10px;
+  vertical-align: top;
+}
+
+.order-platform-cell {
+  position: relative;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 10px;
+  min-height: 58px;
+  padding-left: 8px;
+}
+
+.order-platform-cell::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 2px;
+  bottom: 2px;
+  width: 3px;
+  border-radius: 2px;
+  background: #9ca3af;
+}
+
+.order-platform-cell.platform-taobao::before {
+  background: #f97316;
+}
+
+.order-platform-cell.platform-jd::before {
+  background: #dc2626;
+}
+
+.order-platform-main {
+  min-width: 0;
+}
+
+.order-platform-meta,
+.order-platform-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.order-platform-meta {
+  height: 22px;
+}
+
+.order-platform-meta .ant-tag {
+  margin-right: 0;
+}
+
+.order-no-link {
+  height: 20px;
+  padding: 0 !important;
+  font-weight: 600;
+}
+
+.order-time-text {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.order-product-line {
+  max-width: 430px;
+  margin: 2px 0 3px;
+}
+
+.order-product-line .inline-edit {
+  min-height: 20px;
+  font-weight: 500;
+}
+
+.order-platform-sub {
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.order-platform-sub span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.order-status-select {
+  width: 100%;
+}
+
+.order-logistics-grid {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 2px 8px;
+  line-height: 20px;
+}
+
+.order-logistics-grid .inline-edit {
+  min-height: 20px;
+}
+
+.platform-status-text {
+  display: block;
+  max-width: 170px;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.order-row-overdue > td {
+  background: #fff1f0 !important;
+}
+
+.order-row-due-soon > td {
+  background: #fff7e6 !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+  .desktop-hidden {
+    display: block !important;
+  }
+}
