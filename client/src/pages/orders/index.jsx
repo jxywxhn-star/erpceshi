@@ -58,6 +58,23 @@ function deriveSize(record) {
   }
 }
 
+// 从采集数据带出商品规格(颜色/码数)用于展示。兼容千牛(SkuName) 与旧采集器(SkuText)。
+function getSku(record) {
+  try {
+    const j = JSON.parse(record.raw_json || '{}');
+    const it = (j.Items && j.Items[0]) || {};
+    let s = it.SkuName || it.SkuText || it.sku || '';
+    if (s && typeof s === 'object') {
+      const color = s['颜色分类'] || s.color || '';
+      const size = s['尺码'] || s.size || '';
+      s = [size, color].filter(Boolean).join(' / ');
+    }
+    return String(s || '').replace(/\s+/g, ' ').trim();
+  } catch {
+    return '';
+  }
+}
+
 function fileListToUrls(fileList) {
   return (fileList || [])
     .filter((f) => f.status === 'done')
@@ -275,6 +292,7 @@ function getPlatformMeta(record) {
 function renderOrderTitle(record, openDetail, onSave) {
   const platform = getPlatformMeta(record);
   const shopName = record.shop_real_name || record.shop_name || '-';
+  const sku = getSku(record);
 
   return (
     <div className={`order-platform-cell ${platform.className}`}>
@@ -304,6 +322,7 @@ function renderOrderTitle(record, openDetail, onSave) {
           <span>店铺：{shopName}</span>
           <span>买家：{record.buyer_nick || '-'}</span>
           <span>数量：{record.quantity || 1}</span>
+          {sku && <span>规格：{sku}</span>}
         </div>
         {(record.receiver_address || record.receiver_raw || record.receiver_name) && (
           <div className="order-receiver-line" style={{ fontSize: 12, color: '#0958d9', marginTop: 2 }}>
