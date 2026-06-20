@@ -167,6 +167,26 @@ router.get('/shop-resolve', (req, res) => {
   res.json({ ok: true, by_unb: byUnb, shops });
 });
 
+// 近窗口对账(保证不漏, 成本恒定): 连接器传一批"最近订单号", ERP 只回其中"未入库"的子集。
+// 成本只跟传入的候选数量(最近几页)相关, 永不随历史总量增长。
+router.post('/orders/check-missing', (req, res) => {
+  const cid = String(req.body?.collector_shop_id || '').trim();
+  const candidates = Array.isArray(req.body?.order_nos) ? req.body.order_nos.map(String) : [];
+  if (!cid || candidates.length === 0) return res.json({ ok: true, missing: [] });
+  const db = getDb();
+  const shopIds = db.prepare('SELECT id FROM shops WHERE collector_shop_id = ?').all(cid).map((r) => r.id);
+  const have = new Set();
+  // 已入库判定: 同 collector_shop_id 或同 shop_id 下已有该订单号
+  const qCid = db.prepare('SELECT 1 FROM orders WHERE collector_shop_id = ? AND order_no = ? LIMIT 1');
+  const qShop = db.prepare('SELECT 1 FROM orders WHERE shop_id = ? AND order_no = ? LIMIT 1');
+  for (const no of candidates) {
+    if (qCid.get(cid, no)) { have.add(no); continue; }
+    for (const sid of shopIds) { if (qShop.get(sid, no)) { have.add(no); break; } }
+  }
+  const missing = candidates.filter((no) => !have.has(no));
+  res.json({ ok: true, missing });
+});
+
 // 每店已入库订单数(按 collector_shop_id), 供连接器自动对账补全历史
 router.get('/order-counts', (req, res) => {
   const db = getDb();
