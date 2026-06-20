@@ -39,7 +39,11 @@ export default function Shops() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    const timer = setInterval(load, 30000);  // 每30秒自动刷新, 实时监控
+    return () => clearInterval(timer);
+  }, []);
 
   const columns = [
     {
@@ -111,6 +115,17 @@ export default function Shops() {
   ];
 
   const unhealthy = rows.filter((r) => r.qn && (r.qn.healthy === 0 || r.qn.login_ok === 0 || r.qn.login_ok === false));
+  const linked = rows.filter((r) => r.qn);  // 已接入千牛的店
+  const collectedSum = linked.reduce((a, r) => a + (r.qn.total_known || 0), 0);
+  const totalSum = linked.reduce((a, r) => a + (r.qn.total_in_db || 0), 0);
+  const lastUpd = linked.reduce((m, r) => (r.qn.updated_at && r.qn.updated_at > m ? r.qn.updated_at : m), '');
+
+  const statCard = (label, value, color) => (
+    <div style={{ background: '#fff', borderRadius: 10, padding: '12px 18px', boxShadow: '0 1px 3px rgba(0,0,0,.08)', minWidth: 120 }}>
+      <div style={{ fontSize: 24, fontWeight: 700, color: color || '#1f2937' }}>{value}</div>
+      <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>{label}</div>
+    </div>
+  );
 
   return (
     <Card
@@ -118,6 +133,13 @@ export default function Shops() {
       bordered={false}
       extra={<Button icon={<ReloadOutlined />} onClick={load} loading={loading}>刷新</Button>}
     >
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
+        {statCard('已接入店铺', linked.length)}
+        {statCard('正常', linked.length - unhealthy.length, '#16a34a')}
+        {statCard('异常/风控', unhealthy.length, unhealthy.length ? '#dc2626' : '#16a34a')}
+        {statCard('已采订单(合计)', `${collectedSum}/${totalSum}`)}
+        {statCard('最后采集更新', lastUpd ? lastUpd.slice(5, 16) : '-')}
+      </div>
       {unhealthy.length > 0 && (
         <Alert
           type="error"
