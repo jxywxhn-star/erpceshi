@@ -179,9 +179,17 @@ router.post('/orders/check-missing', (req, res) => {
   // 已入库判定: 同 collector_shop_id 或同 shop_id 下已有该订单号
   const qCid = db.prepare('SELECT 1 FROM orders WHERE collector_shop_id = ? AND order_no = ? LIMIT 1');
   const qShop = db.prepare('SELECT 1 FROM orders WHERE shop_id = ? AND order_no = ? LIMIT 1');
+  // 被忽略的单(ERP 里手动删过, 故意不再入库): 也视为"已处理", 不算缺失, 避免反复补
+  const qIgnCid = db.prepare('SELECT 1 FROM order_sync_ignores WHERE collector_shop_id = ? AND order_no = ? LIMIT 1');
+  const qIgnShop = db.prepare('SELECT 1 FROM order_sync_ignores WHERE shop_id = ? AND order_no = ? LIMIT 1');
   for (const no of candidates) {
     if (qCid.get(cid, no)) { have.add(no); continue; }
-    for (const sid of shopIds) { if (qShop.get(sid, no)) { have.add(no); break; } }
+    if (qIgnCid.get(cid, no)) { have.add(no); continue; }
+    let hit = false;
+    for (const sid of shopIds) {
+      if (qShop.get(sid, no) || qIgnShop.get(sid, no)) { hit = true; break; }
+    }
+    if (hit) have.add(no);
   }
   const missing = candidates.filter((no) => !have.has(no));
   res.json({ ok: true, missing });
