@@ -152,6 +152,21 @@ router.post('/ingest/shop-status', (req, res) => {
 
 // ---------- 查询（前端页面） ----------
 
+// 店铺解析: 连接器据此稳定映射(优先按unb复用已映射店, 再按名), 避免重复建店
+router.get('/shop-resolve', (req, res) => {
+  const db = getDb();
+  const byUnb = {};
+  for (const r of db.prepare(
+    "SELECT st.unb AS unb, s.collector_shop_id AS cid FROM qianniu_shop_status st JOIN shops s ON s.id = st.shop_id WHERE st.unb <> '' AND s.collector_shop_id <> ''",
+  ).all()) {
+    byUnb[r.unb] = r.cid;
+  }
+  const shops = db.prepare(
+    "SELECT collector_shop_id AS cid, name, real_name FROM shops WHERE collector_shop_id <> ''",
+  ).all();
+  res.json({ ok: true, by_unb: byUnb, shops });
+});
+
 // 每店已入库订单数(按 collector_shop_id), 供连接器自动对账补全历史
 router.get('/order-counts', (req, res) => {
   const db = getDb();
